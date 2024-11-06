@@ -1,4 +1,4 @@
-# Placar de Vôlei
+# Placar do Vôlei
 
 Este é um aplicativo de placar de vôlei desenvolvido em React Native. Ele permite controlar o placar dos times, salvar partidas, ativar modo escuro, cronômetro, e mais.
 
