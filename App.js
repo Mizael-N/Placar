@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, ScrollView, StyleSheet, Dimensions, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, ScrollView, Dimensions, Image } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Audio } from 'expo-av';
 
 export default function App() {
   const [placarTimeA, setPlacarTimeA] = useState(0);
@@ -8,22 +11,71 @@ export default function App() {
   const [nomeTimeB, setNomeTimeB] = useState("Time B");
   const [placaresSalvos, setPlacaresSalvos] = useState([]);
   const [modoEscuro, setModoEscuro] = useState(false);
+  
+
+    const [sound, setSound] = useState(null);
+    const [Running, setRunning] = useState(false);
+    const [timer, setTimer] = useState(0);
+  
+    // Carrega e reproduz o som
+    async function playSound(soundFile) {
+      const { sound } = await Audio.Sound.createAsync(soundFile);
+      setSound(sound);
+      await sound.playAsync();
+    }
+  
+    // Limpa o som quando o componente é desmontado
+    useEffect(() => {
+      return sound ? () => sound.unloadAsync() : undefined;
+    }, [sound]);
+  
+    // Iniciar cronômetro e som de início
+    const startTimer = () => {
+      setRunning(true);
+      playSound(require('./assets/inicio.mp3'));
+    };
+  
+    // Pausar cronômetro
+    const pauseTimer = () => {
+      setRunning(false);
+    };
+  
+    // Resetar cronômetro e som de encerramento
+    const resetTimer = () => {
+      setRunning(false);
+      setTimer(0);
+      playSound(require('./assets/encerrar.mp3'));
+    };
+  
+    useEffect(() => {
+      let interval;
+      if (Running) {
+        interval = setInterval(() => {
+          setTimer(prevTime => prevTime + 1);
+        }, 1000);
+      } else if (!Running && timer !== 0) {
+        clearInterval(interval);
+      }
+      return () => clearInterval(interval);
+    }, [Running]);
+
 
   const adicionarPonto = (setPlacar, placar) => setPlacar(placar + 1);
   const removerPonto = (setPlacar, placar) => setPlacar(placar > 0 ? placar - 1 : 0);
-
   const resetarPlacar = () => {
     setPlacarTimeA(0);
     setPlacarTimeB(0);
   };
 
   const salvarPlacar = () => {
+    const dataHoraAtual = new Date().toLocaleString();
     const novoPlacar = {
       id: Date.now().toString(),
       nomeTimeA,
       nomeTimeB,
       placarTimeA,
       placarTimeB,
+      dataHora: dataHoraAtual,
     };
     setPlacaresSalvos([...placaresSalvos, novoPlacar]);
     resetarPlacar();
@@ -33,21 +85,48 @@ export default function App() {
     setPlacaresSalvos(placaresSalvos.filter((placar) => placar.id !== id));
   };
 
+  const zerarPlacarTimeA = () => {
+    setPlacarTimeA(0);
+  };
+
+  const zerarPlacarTimeB = () => {
+    setPlacarTimeB(0);
+  };
+
   const toggleModoEscuro = () => setModoEscuro((prev) => !prev);
 
   const tema = modoEscuro ? estilosEscuros : estilosClaros;
 
+
   return (
-    <ScrollView contentContainerStyle={tema.scrollContainer}>
+    <ScrollView contentContainerStyle={tema.scrollContent}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={tema.container}>
         <View style={tema.header}>
           <Text style={tema.title}>Placar do Vôlei</Text>
           <TouchableOpacity onPress={toggleModoEscuro} style={tema.configButton}>
-            <Image
-              source={{ uri: 'https://img.icons8.com/color/48/000000/volleyball.png' }}
-              style={tema.icon}
+          <Icon
+              name={modoEscuro ? "wb-sunny" : "dark-mode"} // Ícone de sol no modo escuro e lua no modo claro
+              size={30}
+              color={modoEscuro ? "#FFD700" : "#1E90FF"} // Cor do sol em dourado e da lua em verde
             />
           </TouchableOpacity>
+        </View>
+
+        {/* Cronômetro */}
+        <View style={tema.timerContainer}>
+        <Text style={tema.timerText}>{`${Math.floor(timer / 60)}:${timer % 60 < 10 ? '0' : ''}${timer % 60}`}</Text>
+        <View style={tema.timerButtons}>
+            <TouchableOpacity onPress={startTimer} style={tema.timerButton}>
+              <Text style={tema.timerButtonText}>Iniciar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={pauseTimer} style={tema.timerButton}>
+              <Text style={tema.timerButtonText}>Pausar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={resetTimer} style={tema.timerButton}>
+              <Text style={tema.timerButtonText}>Resetar</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={tema.scoreContainer}>
@@ -65,6 +144,9 @@ export default function App() {
               </TouchableOpacity>
               <TouchableOpacity style={tema.buttonRemove} onPress={() => removerPonto(setPlacarTimeA, placarTimeA)}>
                 <Text style={tema.buttonText}>-</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={tema.buttonReset} onPress={zerarPlacarTimeA}>
+                <Icon name="refresh" size={22} color="#FFF" />
               </TouchableOpacity>
             </View>
           </View>
@@ -84,6 +166,9 @@ export default function App() {
               <TouchableOpacity style={tema.buttonRemove} onPress={() => removerPonto(setPlacarTimeB, placarTimeB)}>
                 <Text style={tema.buttonText}>-</Text>
               </TouchableOpacity>
+              <TouchableOpacity style={tema.buttonReset} onPress={zerarPlacarTimeB}>
+                <Icon name="refresh" size={22} color="#FFF" />
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -93,38 +178,42 @@ export default function App() {
         </TouchableOpacity>
 
         <Text style={tema.savedScoresTitle}>Placares Salvos</Text>
+
         <FlatList
           data={placaresSalvos}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={tema.savedScoreContainer}>
-              <Text style={tema.savedScoreText}>
-                {item.nomeTimeA} {item.placarTimeA} - {item.placarTimeB} {item.nomeTimeB}
-              </Text>
-              <TouchableOpacity onPress={() => apagarPlacar(item.id)}>
-                <Text style={tema.deleteText}>X</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          style={tema.savedScoresList}
+          renderItem={({ item }) => {
+            const corPlacarTimeA = item.placarTimeA > item.placarTimeB ? tema.winnerScore : tema.loserScore;
+            const corPlacarTimeB = item.placarTimeB > item.placarTimeA ? tema.winnerScore : tema.loserScore;
+            return (
+              <View style={tema.savedScoreContainer}>
+                <Text style={tema.savedScoreText}>
+                  {item.nomeTimeA} <Text style={corPlacarTimeA}>{item.placarTimeA}</Text> - <Text style={corPlacarTimeB}>{item.placarTimeB}</Text> {item.nomeTimeB}
+                </Text>
+                <Text style={tema.savedScoreDate}>{item.dataHora}</Text>
+                <TouchableOpacity onPress={() => apagarPlacar(item.id)} style={tema.deleteButton}>
+                  <Text style={tema.deleteText}>x</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          }}
+          contentContainerStyle={tema.savedScoresList}
+          showsVerticalScrollIndicator={false}
         />
       </View>
+      
+    </GestureHandlerRootView>
     </ScrollView>
   );
 }
 
-const { width } = Dimensions.get('window');
-
 const estilosClaros = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    alignItems: 'center',
-    paddingVertical: 20,
-    backgroundColor: '#FFFFFF',
-  },
   container: {
-    width: width * 0.9,
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 20,
   },
   header: {
     flexDirection: 'row',
@@ -134,6 +223,30 @@ const estilosClaros = StyleSheet.create({
     marginBottom: 20,
     paddingTop: 20,
   },
+  timerContainer: { 
+    alignItems: 'center', 
+    marginBottom: 20 
+  },
+  timerText: { 
+    fontSize: 36, 
+    fontWeight: 'bold', 
+    color: '#333' 
+  },
+  timerButtons: { 
+    flexDirection: 'row', 
+    marginTop: 10 
+  },
+  timerButton: { 
+    backgroundColor: '#1E90FF', 
+    padding: 10, 
+    borderRadius: 10, 
+    marginHorizontal: 5 
+  },
+  timerButtonText: { 
+    color: '#FFF', 
+    fontSize: 16 
+  },
+
   icon: {
     width: 40,
     height: 40,
@@ -145,9 +258,12 @@ const estilosClaros = StyleSheet.create({
     color: '#1E90FF',
     flex: 1,
     textAlign: 'center',
+    marginLeft: 80,
   },
   configButton: {
     paddingHorizontal: 10,
+    marginHorizontal: 10,
+    
   },
   scoreContainer: {
     flexDirection: 'row',
@@ -161,7 +277,7 @@ const estilosClaros = StyleSheet.create({
     backgroundColor: '#F8F8F8',
     padding: 15,
     borderRadius: 15,
-    elevation: 5, // Sombra para destacar
+    elevation: 5,
   },
   teamNameInput: {
     fontSize: 18,
@@ -178,18 +294,32 @@ const estilosClaros = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between', // Isso mantém o espaço entre os botões
   },
   buttonAdd: {
     backgroundColor: '#4CAF50',
-    padding: 10,
+    padding: 5,
     borderRadius: 10,
     marginHorizontal: 5,
+    flex: 1, // Faz o botão ocupar o mesmo espaço
+    alignItems: 'center', // Centraliza o conteúdo dentro do botão
   },
   buttonRemove: {
     backgroundColor: '#FF6347',
-    padding: 10,
+    padding: 5,
     borderRadius: 10,
     marginHorizontal: 5,
+    flex: 1, // Faz o botão ocupar o mesmo espaço
+    alignItems: 'center', // Centraliza o conteúdo dentro do botão
+  },
+  buttonReset: {
+    backgroundColor: '#FFA500',
+    padding: 5,
+    borderRadius: 10,
+    marginHorizontal: 5,
+    flex: 1, // Faz o botão ocupar o mesmo espaço
+    alignItems: 'center', // Centraliza o conteúdo dentro do botão
+    justifyContent: 'center', // Centraliza o ícone no botão  
   },
   buttonText: {
     fontSize: 24,
@@ -207,6 +337,13 @@ const estilosClaros = StyleSheet.create({
     color: '#FFF',
     fontSize: 18,
   },
+  savedScoreDate: {
+    fontSize: 12,
+    color: '#666', 
+    marginLeft:20,
+    marginTop: 0,
+  },
+  
   savedScoresTitle: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -221,34 +358,221 @@ const estilosClaros = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 15,
-    backgroundColor: '#E6E6FA', // Um tom suave para destaque
+    backgroundColor: '#E6E6FA',
     borderRadius: 10,
     marginVertical: 5,
-    elevation: 3, // Sombra para destaque
+    elevation: 3,
+    alignItems: 'center',
   },
   savedScoreText: {
     fontSize: 16,
     color: '#333',
     fontWeight: 'bold',
   },
-  deleteText: {
-    color: '#FF6347',
+  winnerScore: {
+    color: 'green',
     fontWeight: 'bold',
-    alignSelf: 'center',
+  },
+  loserScore: {
+    color: 'red',
+    fontWeight: 'bold',
+  },
+  deleteButton: {
+    backgroundColor: '#FF6347',
+    padding: 7,
+    borderRadius: 7,
+    marginLeft: 15,
+    elevation: 3,
+  },
+  deleteText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
   },
 });
 
 const estilosEscuros = StyleSheet.create({
-  ...estilosClaros,
-  scrollContainer: { ...estilosClaros.scrollContainer, backgroundColor: '#121212' },
-  container: { ...estilosClaros.container, backgroundColor: '#121212' },
-  title: { ...estilosClaros.title, color: '#BB86FC' },
-  teamContainer: { ...estilosClaros.teamContainer, backgroundColor: '#1E1E1E' },
-  saveButton: { ...estilosClaros.saveButton, backgroundColor: '#BB86FC' },
-  saveButtonText: { ...estilosClaros.saveButtonText, color: '#FFFFFF' },
-  savedScoresTitle: { ...estilosClaros.savedScoresTitle, color: '#BB86FC' },
-  savedScoreContainer: { ...estilosClaros.savedScoreContainer, backgroundColor: '#333333' },
-  savedScoreText: { ...estilosClaros.savedScoreText, color: '#FFFFFF' },
-  deleteText: { ...estilosClaros.deleteText, color: '#CF6679' },
-});
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#121212',
+    paddingVertical: 20,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 20,
+    paddingTop: 20,
+  },
+  timerContainer: { 
+    alignItems: 'center', 
+    marginBottom: 20 
+  },
+  timerText: { 
+    fontSize: 36, 
+    fontWeight: 'bold', 
+    color: '#BB86FC' 
+  },
+  timerButtons: { 
+    flexDirection: 'row', 
+    marginTop: 10 
+  },
+  timerButton: { 
+    backgroundColor: '#BB86FC', 
+    padding: 10, 
+    borderRadius: 10, 
+    marginHorizontal: 5 
+  },
+  timerButtonText: { 
+    color: '#000', 
+    fontSize: 16 
+  },
 
+  icon: {
+    width: 40,
+    height: 40,
+    marginLeft: 10,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#BB86FC',
+    flex: 1,
+    textAlign: 'center',
+    marginLeft: 80,
+  },
+  configButton: {
+    paddingHorizontal: 10,
+    marginHorizontal: 10,
+  },
+  scoreContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 20,
+  },
+  teamContainer: {
+    width: '48%',
+    alignItems: 'center',
+    backgroundColor: '#1E1E1E',
+    padding: 15,
+    borderRadius: 15,
+    elevation: 5,
+  },
+  teamNameInput: {
+    fontSize: 18,
+    color: '#FFF',
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#444',
+    width: '100%',
+    textAlign: 'center',
+  },
+  score: {
+    fontSize: 48,
+    color: '#BB86FC',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between', // Isso mantém o espaço entre os botões
+  },
+  buttonAdd: {
+    backgroundColor: '#4CAF50',
+    padding: 5,
+    borderRadius: 10,
+    marginHorizontal: 5,
+    flex: 1, // Faz o botão ocupar o mesmo espaço
+    alignItems: 'center', // Centraliza o conteúdo dentro do botão
+  },
+  buttonRemove: {
+    backgroundColor: '#FF6347',
+    padding: 5,
+    borderRadius: 10,
+    marginHorizontal: 5,
+    flex: 1, // Faz o botão ocupar o mesmo espaço
+    alignItems: 'center', // Centraliza o conteúdo dentro do botão
+  },
+  buttonReset: {
+    backgroundColor: '#FFA500',
+    padding: 5,
+    borderRadius: 10,
+    marginHorizontal: 5,
+    flex: 1, // Faz o botão ocupar o mesmo espaço
+    alignItems: 'center', // Centraliza o conteúdo dentro do botão
+    justifyContent: 'center', // Centraliza o ícone no botão  
+  },
+  buttonText: {
+    fontSize: 24,
+    color: '#FFF',
+  },
+  saveButton: {
+    backgroundColor: '#BB86FC',
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginTop: 20,
+    width: '60%',
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#000',
+    fontSize: 18,
+  },
+  savedScoreDate: {
+    fontSize: 12,
+    color: '#FFF',
+    marginLeft:20,
+    marginTop: 0,
+  },
+  
+  savedScoresTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#BB86FC',
+    marginTop: 30,
+  },
+  savedScoresList: {
+    width: '100%',
+    marginTop: 10,
+  },
+  savedScoreContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 15,
+    backgroundColor: '#333333',
+    borderRadius: 10,
+    marginVertical: 5,
+    elevation: 3,
+    alignItems: 'center',
+  },
+  savedScoreText: {
+    fontSize: 16,
+    color: '#FFF',
+    fontWeight: 'bold',
+  },
+  winnerScore: {
+    color: 'green',
+    fontWeight: 'bold',
+  },
+  loserScore: {
+    color: 'red',
+    fontWeight: 'bold',
+  },
+  deleteButton: {
+    backgroundColor: '#CF6679',
+    padding: 7,
+    borderRadius: 7,
+    marginLeft: 15,
+    elevation: 3,
+  },
+  deleteText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+});
