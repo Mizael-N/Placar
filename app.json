@@ -2,12 +2,12 @@
   "expo": {
     "name": "PlacarVolei",
     "slug": "PlacarVolei",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "orientation": "default",
-    "icon": "./assets/bola.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/bola.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -15,9 +15,10 @@
       "supportsTablet": true
     },
     "android": {
-      "versionCode": 6,
+      "versionCode": 7,
+      "resizeMode": "contain",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/bola.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.placarvolei"

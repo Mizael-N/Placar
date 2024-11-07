@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, ScrollView, Dimensions, Image } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Audio } from 'expo-av';
+import { StatusBar} from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
+
 
 export default function App() {
   const [placarTimeA, setPlacarTimeA] = useState(0);
@@ -11,53 +13,52 @@ export default function App() {
   const [nomeTimeB, setNomeTimeB] = useState("Time B");
   const [placaresSalvos, setPlacaresSalvos] = useState([]);
   const [modoEscuro, setModoEscuro] = useState(false);
-  
+  const [sound, setSound] = useState(null);
+  const [Running, setRunning] = useState(false);
+  const [timer, setTimer] = useState(0);
 
-    const [sound, setSound] = useState(null);
-    const [Running, setRunning] = useState(false);
-    const [timer, setTimer] = useState(0);
-  
-    // Carrega e reproduz o som
-    async function playSound(soundFile) {
-      const { sound } = await Audio.Sound.createAsync(soundFile);
-      setSound(sound);
-      await sound.playAsync();
+
+  // Carrega e reproduz o som
+  async function playSound(soundFile) {
+    const { sound } = await Audio.Sound.createAsync(soundFile);
+    setSound(sound);
+    await sound.playAsync();
+  }
+
+  // Limpa o som quando o componente é desmontado
+  useEffect(() => {
+    return sound ? () => sound.unloadAsync() : undefined;
+  }, [sound]);
+
+  // Iniciar cronômetro e som de início
+  const startTimer = () => {
+    setRunning(true);
+    playSound(require('./assets/inicio.mp3'));
+  };
+
+  // Pausar cronômetro
+  const pauseTimer = () => {
+    setRunning(false);
+  };
+
+  // Resetar cronômetro e som de encerramento
+  const resetTimer = () => {
+    setRunning(false);
+    setTimer(0);
+    playSound(require('./assets/encerrar.mp3'));
+  };
+
+  useEffect(() => {
+    let interval;
+    if (Running) {
+      interval = setInterval(() => {
+        setTimer(prevTime => prevTime + 1);
+      }, 1000);
+    } else if (!Running && timer !== 0) {
+      clearInterval(interval);
     }
-  
-    // Limpa o som quando o componente é desmontado
-    useEffect(() => {
-      return sound ? () => sound.unloadAsync() : undefined;
-    }, [sound]);
-  
-    // Iniciar cronômetro e som de início
-    const startTimer = () => {
-      setRunning(true);
-      playSound(require('./assets/inicio.mp3'));
-    };
-  
-    // Pausar cronômetro
-    const pauseTimer = () => {
-      setRunning(false);
-    };
-  
-    // Resetar cronômetro e som de encerramento
-    const resetTimer = () => {
-      setRunning(false);
-      setTimer(0);
-      playSound(require('./assets/encerrar.mp3'));
-    };
-  
-    useEffect(() => {
-      let interval;
-      if (Running) {
-        interval = setInterval(() => {
-          setTimer(prevTime => prevTime + 1);
-        }, 1000);
-      } else if (!Running && timer !== 0) {
-        clearInterval(interval);
-      }
-      return () => clearInterval(interval);
-    }, [Running]);
+    return () => clearInterval(interval);
+  }, [Running]);
 
 
   const adicionarPonto = (setPlacar, placar) => setPlacar(placar + 1);
@@ -99,13 +100,13 @@ export default function App() {
 
 
   return (
-    <ScrollView contentContainerStyle={tema.scrollContent}>
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={tema.container}>
+  <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: modoEscuro ? '#121212' : '#FFFFFF' }}>
+      <StatusBar translucent backgroundColor="transparent" barStyle={modoEscuro ? 'light-content' : 'dark-content'} />
+      <View style={[tema.container, { paddingTop: 40 }]}>
         <View style={tema.header}>
-          <Text style={tema.title}>Placar do Vôlei</Text>
+          <Text style={tema.title}>Game Score</Text>
           <TouchableOpacity onPress={toggleModoEscuro} style={tema.configButton}>
-          <Icon
+            <Icon
               name={modoEscuro ? "wb-sunny" : "dark-mode"} // Ícone de sol no modo escuro e lua no modo claro
               size={30}
               color={modoEscuro ? "#FFD700" : "#1E90FF"} // Cor do sol em dourado e da lua em verde
@@ -115,16 +116,16 @@ export default function App() {
 
         {/* Cronômetro */}
         <View style={tema.timerContainer}>
-        <Text style={tema.timerText}>{`${Math.floor(timer / 60)}:${timer % 60 < 10 ? '0' : ''}${timer % 60}`}</Text>
-        <View style={tema.timerButtons}>
+          <Text style={tema.timerText}>{`${Math.floor(timer / 60)}:${timer % 60 < 10 ? '0' : ''}${timer % 60}`}</Text>
+          <View style={tema.timerButtons}>
             <TouchableOpacity onPress={startTimer} style={tema.timerButton}>
-              <Text style={tema.timerButtonText}>Iniciar</Text>
+            <Icon name="play-arrow" size={30} color="#FFF" />
             </TouchableOpacity>
             <TouchableOpacity onPress={pauseTimer} style={tema.timerButton}>
-              <Text style={tema.timerButtonText}>Pausar</Text>
+            <Icon name="pause" size={30} color="#FFF" />
             </TouchableOpacity>
             <TouchableOpacity onPress={resetTimer} style={tema.timerButton}>
-              <Text style={tema.timerButtonText}>Resetar</Text>
+            <Icon name="replay" size={30} color="#FFF" />
             </TouchableOpacity>
           </View>
         </View>
@@ -201,11 +202,22 @@ export default function App() {
           showsVerticalScrollIndicator={false}
         />
       </View>
-      
-    </GestureHandlerRootView>
+
+
     </ScrollView>
+
   );
 }
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  text: {
+    fontSize: 24,
+  },
+});
 
 const estilosClaros = StyleSheet.create({
   container: {
@@ -213,38 +225,39 @@ const estilosClaros = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    paddingVertical: 20,
+
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    marginBottom: 20,
-    paddingTop: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 15,
+    backgroundColor: '#FFFFFF',
   },
-  timerContainer: { 
-    alignItems: 'center', 
-    marginBottom: 20 
+  timerContainer: {
+    alignItems: 'center',
+    marginBottom: 20
   },
-  timerText: { 
-    fontSize: 36, 
-    fontWeight: 'bold', 
-    color: '#333' 
+  timerText: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#333'
   },
-  timerButtons: { 
-    flexDirection: 'row', 
-    marginTop: 10 
+  timerButtons: {
+    flexDirection: 'row',
+    marginTop: 10
   },
-  timerButton: { 
-    backgroundColor: '#1E90FF', 
-    padding: 10, 
-    borderRadius: 10, 
-    marginHorizontal: 5 
+  timerButton: {
+    backgroundColor: '#1E90FF',
+    padding: 10,
+    borderRadius: 10,
+    marginHorizontal: 5
   },
-  timerButtonText: { 
-    color: '#FFF', 
-    fontSize: 16 
+  timerButtonText: {
+    color: '#FFF',
+    fontSize: 16
   },
 
   icon: {
@@ -263,7 +276,7 @@ const estilosClaros = StyleSheet.create({
   configButton: {
     paddingHorizontal: 10,
     marginHorizontal: 10,
-    
+
   },
   scoreContainer: {
     flexDirection: 'row',
@@ -339,11 +352,11 @@ const estilosClaros = StyleSheet.create({
   },
   savedScoreDate: {
     fontSize: 12,
-    color: '#666', 
-    marginLeft:20,
+    color: '#666',
+    marginLeft: 20,
     marginTop: 0,
   },
-  
+
   savedScoresTitle: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -393,10 +406,11 @@ const estilosClaros = StyleSheet.create({
 const estilosEscuros = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+
     alignItems: 'center',
     backgroundColor: '#121212',
     paddingVertical: 20,
+
   },
   scrollContent: {
     flexGrow: 1,
@@ -408,31 +422,32 @@ const estilosEscuros = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    marginBottom: 20,
-    paddingTop: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 15,
+    backgroundColor: '#121212',
   },
-  timerContainer: { 
-    alignItems: 'center', 
-    marginBottom: 20 
+  timerContainer: {
+    alignItems: 'center',
+    marginBottom: 20
   },
-  timerText: { 
-    fontSize: 36, 
-    fontWeight: 'bold', 
-    color: '#BB86FC' 
+  timerText: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#BB86FC'
   },
-  timerButtons: { 
-    flexDirection: 'row', 
-    marginTop: 10 
+  timerButtons: {
+    flexDirection: 'row',
+    marginTop: 10
   },
-  timerButton: { 
-    backgroundColor: '#BB86FC', 
-    padding: 10, 
-    borderRadius: 10, 
-    marginHorizontal: 5 
+  timerButton: {
+    backgroundColor: '#BB86FC',
+    padding: 10,
+    borderRadius: 10,
+    marginHorizontal: 5
   },
-  timerButtonText: { 
-    color: '#000', 
-    fontSize: 16 
+  timerButtonText: {
+    color: '#000',
+    fontSize: 16
   },
 
   icon: {
@@ -527,10 +542,10 @@ const estilosEscuros = StyleSheet.create({
   savedScoreDate: {
     fontSize: 12,
     color: '#FFF',
-    marginLeft:20,
+    marginLeft: 20,
     marginTop: 0,
   },
-  
+
   savedScoresTitle: {
     fontSize: 20,
     fontWeight: 'bold',

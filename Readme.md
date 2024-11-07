@@ -12,6 +12,14 @@ Este é um aplicativo de placar de vôlei desenvolvido em React Native. Ele perm
 
 ## Mudanças Recentes
 
+### Versão 1.0.7
+- **Mudanças no design**:
+    - Adição de icones no lugar dos textos do cronômetro
+    - Nova SplashScreen
+    - Novo título para o app
+- **Correção de bugs**
+    - Modo escuro agora preenche todo o background do app
+
 ### Versão 1.0.6
 - **Adição de sons**:
     - Som de apito inicial da partida ao iniciar o cronômetro e de fim ao resetar;
