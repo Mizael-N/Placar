@@ -1,27 +1,27 @@
 {
   "expo": {
-    "name": "PlacarVolei",
-    "slug": "PlacarVolei",
-    "version": "1.0.7",
+    "name": "GameScore",
+    "slug": "GameScore",
+    "version": "1.0.8",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
     "ios": {
       "supportsTablet": true
     },
     "android": {
-      "versionCode": 7,
-      "resizeMode": "contain",
+      "versionCode": 8,
+      "resizeMode": "cover",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.placarvolei"
+      "package": "com.gamescore"
     },
     "web": {
       "favicon": "./assets/favicon.png"

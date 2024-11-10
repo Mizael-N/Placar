@@ -12,6 +12,14 @@ Este é um aplicativo de placar de vôlei desenvolvido em React Native. Ele perm
 
 ## Mudanças Recentes
 
+### Versão 1.0.8
+- **Correções de bugs**
+    - Ajustes na splashScreen para comportar diferentes orientações de tela ao iniciar o app
+
+- **Pequenos ajustes de design**
+    - Alteração dos tamanhos dos títulos principais
+    - Ajuste no tamanho dos textos em placares salvos
+
 ### Versão 1.0.7
 - **Mudanças no design**:
     - Adição de icones no lugar dos textos do cronômetro

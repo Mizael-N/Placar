@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, ScrollView, Dimensions, Image } from 'react-native';
+import React, { useState, useEffect} from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, ScrollView, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Audio } from 'expo-av';
-import { StatusBar} from 'react-native';
-import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'react-native';
+
 
 
 export default function App() {
@@ -99,8 +99,10 @@ export default function App() {
   const tema = modoEscuro ? estilosEscuros : estilosClaros;
 
 
+
+
   return (
-  <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: modoEscuro ? '#121212' : '#FFFFFF' }}>
+    <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: modoEscuro ? '#121212' : '#FFFFFF' }}>
       <StatusBar translucent backgroundColor="transparent" barStyle={modoEscuro ? 'light-content' : 'dark-content'} />
       <View style={[tema.container, { paddingTop: 40 }]}>
         <View style={tema.header}>
@@ -119,13 +121,13 @@ export default function App() {
           <Text style={tema.timerText}>{`${Math.floor(timer / 60)}:${timer % 60 < 10 ? '0' : ''}${timer % 60}`}</Text>
           <View style={tema.timerButtons}>
             <TouchableOpacity onPress={startTimer} style={tema.timerButton}>
-            <Icon name="play-arrow" size={30} color="#FFF" />
+              <Icon name="play-arrow" size={30} color="#FFF" />
             </TouchableOpacity>
             <TouchableOpacity onPress={pauseTimer} style={tema.timerButton}>
-            <Icon name="pause" size={30} color="#FFF" />
+              <Icon name="pause" size={30} color="#FFF" />
             </TouchableOpacity>
             <TouchableOpacity onPress={resetTimer} style={tema.timerButton}>
-            <Icon name="replay" size={30} color="#FFF" />
+              <Icon name="replay" size={30} color="#FFF" />
             </TouchableOpacity>
           </View>
         </View>
@@ -266,7 +268,7 @@ const estilosClaros = StyleSheet.create({
     marginLeft: 10,
   },
   title: {
-    fontSize: 28,
+    fontSize: 35,
     fontWeight: 'bold',
     color: '#1E90FF',
     flex: 1,
@@ -358,7 +360,7 @@ const estilosClaros = StyleSheet.create({
   },
 
   savedScoresTitle: {
-    fontSize: 20,
+    fontSize: 35,
     fontWeight: 'bold',
     color: '#1E90FF',
     marginTop: 30,
@@ -378,7 +380,7 @@ const estilosClaros = StyleSheet.create({
     alignItems: 'center',
   },
   savedScoreText: {
-    fontSize: 16,
+    fontSize: 20,
     color: '#333',
     fontWeight: 'bold',
   },
@@ -456,7 +458,7 @@ const estilosEscuros = StyleSheet.create({
     marginLeft: 10,
   },
   title: {
-    fontSize: 28,
+    fontSize: 35,
     fontWeight: 'bold',
     color: '#BB86FC',
     flex: 1,
@@ -547,7 +549,7 @@ const estilosEscuros = StyleSheet.create({
   },
 
   savedScoresTitle: {
-    fontSize: 20,
+    fontSize: 35,
     fontWeight: 'bold',
     color: '#BB86FC',
     marginTop: 30,
@@ -567,7 +569,7 @@ const estilosEscuros = StyleSheet.create({
     alignItems: 'center',
   },
   savedScoreText: {
-    fontSize: 16,
+    fontSize: 20,
     color: '#FFF',
     fontWeight: 'bold',
   },
