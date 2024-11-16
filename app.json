@@ -1,8 +1,9 @@
 {
   "expo": {
     "name": "GameScore",
-    "slug": "GameScore",
+    "slug": "PlacarVolei",
     "version": "1.0.8",
+    "newArchEnabled": true,
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -11,9 +12,7 @@
       "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
-    "ios": {
-      "supportsTablet": true
-    },
+    
     "android": {
       "versionCode": 8,
       "resizeMode": "cover",
@@ -36,6 +35,6 @@
         "projectId": "711bc668-89a2-453a-877c-dba216276e3f"
       }
     },
-    "owner": "elmariach"
+        "owner": "elmariach"
   }
 }

@@ -1,0 +1,22 @@
+{
+    "pt": {
+      "title": "Placar do Jogo",
+      "start": "Iniciar",
+      "pause": "Pausar",
+      "reset": "Resetar",
+      "saveScore": "Salvar Placar",
+      "savedScores": "Placares Salvos"
+    },
+    "en": {
+      "title": "Game Score",
+      "start": "Start",
+      "pause": "Pause",
+      "reset": "Reset",
+      "saveScore": "Save Score",
+      "savedScores": "Saved Scores",
+      "player1": "Player 1",
+      "player2": "Player 2 "
+
+    }
+  }
+  

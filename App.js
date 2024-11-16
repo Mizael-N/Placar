@@ -1,22 +1,26 @@
-import React, { useState, useEffect} from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, ScrollView, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, ScrollView, Image, StatusBar } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Audio } from 'expo-av';
-import { StatusBar } from 'react-native';
-
+import usaFlag from './assets/usa_flag.png';
+import languages from './locales/languages.json';
 
 
 export default function App() {
   const [placarTimeA, setPlacarTimeA] = useState(0);
   const [placarTimeB, setPlacarTimeB] = useState(0);
-  const [nomeTimeA, setNomeTimeA] = useState("Time A");
-  const [nomeTimeB, setNomeTimeB] = useState("Time B");
+  const [nomeTimeA, setNomeTimeA] = useState("Player 1");
+  const [nomeTimeB, setNomeTimeB] = useState("Player 2");
   const [placaresSalvos, setPlacaresSalvos] = useState([]);
   const [modoEscuro, setModoEscuro] = useState(false);
   const [sound, setSound] = useState(null);
   const [Running, setRunning] = useState(false);
   const [timer, setTimer] = useState(0);
+  const [language, setLanguage] = useState('pt'); // Estado para o idioma ('pt' para português, 'en' para inglês)
 
+
+  // Utilizando o arquivo JSON para textos
+  const texts = languages;
 
   // Carrega e reproduz o som
   async function playSound(soundFile) {
@@ -53,13 +57,12 @@ export default function App() {
     if (Running) {
       interval = setInterval(() => {
         setTimer(prevTime => prevTime + 1);
-      }, 1000);
+      }, 3000);
     } else if (!Running && timer !== 0) {
       clearInterval(interval);
     }
     return () => clearInterval(interval);
   }, [Running]);
-
 
   const adicionarPonto = (setPlacar, placar) => setPlacar(placar + 1);
   const removerPonto = (setPlacar, placar) => setPlacar(placar > 0 ? placar - 1 : 0);
@@ -86,33 +89,34 @@ export default function App() {
     setPlacaresSalvos(placaresSalvos.filter((placar) => placar.id !== id));
   };
 
-  const zerarPlacarTimeA = () => {
-    setPlacarTimeA(0);
-  };
-
-  const zerarPlacarTimeB = () => {
-    setPlacarTimeB(0);
-  };
-
   const toggleModoEscuro = () => setModoEscuro((prev) => !prev);
+  
+  // Função para alternar o idioma
+  const toggleLanguage = () => {
+    setLanguage(language === 'pt' ? 'en' : 'pt');
+  };
 
   const tema = modoEscuro ? estilosEscuros : estilosClaros;
-
-
-
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: modoEscuro ? '#121212' : '#FFFFFF' }}>
       <StatusBar translucent backgroundColor="transparent" barStyle={modoEscuro ? 'light-content' : 'dark-content'} />
       <View style={[tema.container, { paddingTop: 40 }]}>
         <View style={tema.header}>
-          <Text style={tema.title}>Game Score</Text>
+          <Text style={tema.title}>{texts[language].title}</Text>
+          
+          {/* Botão para alternar modo claro/escuro */}
           <TouchableOpacity onPress={toggleModoEscuro} style={tema.configButton}>
             <Icon
-              name={modoEscuro ? "wb-sunny" : "dark-mode"} // Ícone de sol no modo escuro e lua no modo claro
+              name={modoEscuro ? "wb-sunny" : "dark-mode"} 
               size={30}
-              color={modoEscuro ? "#FFD700" : "#1E90FF"} // Cor do sol em dourado e da lua em verde
+              color={modoEscuro ? "#FFD700" : "#1E90FF"} 
             />
+          </TouchableOpacity>
+          
+          {/* Ícone para troca de idioma */}
+          <TouchableOpacity onPress={toggleLanguage} style={{ marginLeft: 10 }}>
+            <Image source={usaFlag} style={{ width: 35, height: 40 }} />
           </TouchableOpacity>
         </View>
 
@@ -148,7 +152,7 @@ export default function App() {
               <TouchableOpacity style={tema.buttonRemove} onPress={() => removerPonto(setPlacarTimeA, placarTimeA)}>
                 <Text style={tema.buttonText}>-</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={tema.buttonReset} onPress={zerarPlacarTimeA}>
+              <TouchableOpacity style={tema.buttonReset} onPress={() => setPlacarTimeA(0)}>
                 <Icon name="refresh" size={22} color="#FFF" />
               </TouchableOpacity>
             </View>
@@ -169,7 +173,7 @@ export default function App() {
               <TouchableOpacity style={tema.buttonRemove} onPress={() => removerPonto(setPlacarTimeB, placarTimeB)}>
                 <Text style={tema.buttonText}>-</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={tema.buttonReset} onPress={zerarPlacarTimeB}>
+              <TouchableOpacity style={tema.buttonReset} onPress={() => setPlacarTimeB(0)}>
                 <Icon name="refresh" size={22} color="#FFF" />
               </TouchableOpacity>
             </View>
@@ -177,10 +181,10 @@ export default function App() {
         </View>
 
         <TouchableOpacity style={tema.saveButton} onPress={salvarPlacar}>
-          <Text style={tema.saveButtonText}>Salvar Placar</Text>
+          <Text style={tema.saveButtonText}>{texts[language].saveScore}</Text>
         </TouchableOpacity>
 
-        <Text style={tema.savedScoresTitle}>Placares Salvos</Text>
+        <Text style={tema.savedScoresTitle}>{texts[language].savedScores}</Text>
 
         <FlatList
           data={placaresSalvos}
@@ -203,23 +207,11 @@ export default function App() {
           contentContainerStyle={tema.savedScoresList}
           showsVerticalScrollIndicator={false}
         />
-      </View>
-
-
+      </View> 
     </ScrollView>
-
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 24,
-  },
-});
+
 
 const estilosClaros = StyleSheet.create({
   container: {
@@ -261,14 +253,9 @@ const estilosClaros = StyleSheet.create({
     color: '#FFF',
     fontSize: 16
   },
-
-  icon: {
-    width: 40,
-    height: 40,
-    marginLeft: 10,
-  },
+  
   title: {
-    fontSize: 35,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#1E90FF',
     flex: 1,
@@ -276,8 +263,10 @@ const estilosClaros = StyleSheet.create({
     marginLeft: 80,
   },
   configButton: {
-    paddingHorizontal: 10,
-    marginHorizontal: 10,
+    flexDirection: 'column',
+    alignItems:'center',
+    paddingHorizontal: 5,
+    marginHorizontal: 5,
 
   },
   scoreContainer: {
@@ -360,7 +349,7 @@ const estilosClaros = StyleSheet.create({
   },
 
   savedScoresTitle: {
-    fontSize: 35,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#1E90FF',
     marginTop: 30,
@@ -380,7 +369,7 @@ const estilosClaros = StyleSheet.create({
     alignItems: 'center',
   },
   savedScoreText: {
-    fontSize: 20,
+    fontSize: 18,
     color: '#333',
     fontWeight: 'bold',
   },
@@ -395,7 +384,7 @@ const estilosClaros = StyleSheet.create({
   deleteButton: {
     backgroundColor: '#FF6347',
     padding: 7,
-    borderRadius: 7,
+    borderRadius: 5,
     marginLeft: 15,
     elevation: 3,
   },
@@ -451,14 +440,9 @@ const estilosEscuros = StyleSheet.create({
     color: '#000',
     fontSize: 16
   },
-
-  icon: {
-    width: 40,
-    height: 40,
-    marginLeft: 10,
-  },
+  
   title: {
-    fontSize: 35,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#BB86FC',
     flex: 1,
@@ -466,8 +450,8 @@ const estilosEscuros = StyleSheet.create({
     marginLeft: 80,
   },
   configButton: {
-    paddingHorizontal: 10,
-    marginHorizontal: 10,
+    paddingHorizontal: 5,
+    marginHorizontal: 5,
   },
   scoreContainer: {
     flexDirection: 'row',
@@ -549,7 +533,7 @@ const estilosEscuros = StyleSheet.create({
   },
 
   savedScoresTitle: {
-    fontSize: 35,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#BB86FC',
     marginTop: 30,
@@ -569,7 +553,7 @@ const estilosEscuros = StyleSheet.create({
     alignItems: 'center',
   },
   savedScoreText: {
-    fontSize: 20,
+    fontSize: 18,
     color: '#FFF',
     fontWeight: 'bold',
   },
