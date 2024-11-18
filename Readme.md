@@ -1,16 +1,14 @@
-# Placar do Vôlei
+# GameScore
 
-Este é um aplicativo de placar de vôlei desenvolvido em React Native. Ele permite controlar o placar dos times, salvar partidas, ativar modo escuro, cronômetro, e mais.
-
-## Funcionalidades Principais
-
-- **Controle de Placar**: Adicione, remova e resete pontos para cada time.
-- **Salvar Placar**: Salve o placar de uma partida para referência futura.
-- **Modo Claro e Escuro**: Alterne entre modo claro e modo escuro.
-- **Cronômetro**: Controle de tempo com botões para iniciar, pausar e resetar.
-- **Sons de Partida**: Sons personalizados para o início e fim da partida.
+Este é um aplicativo de placar desenvolvido em React Native. Ele permite controlar o placar dos times, salvar partidas, ativar modo escuro, cronômetro, e mais.
 
 ## Mudanças Recentes
+
+### Versão 1.0.9
+- **Adição de mudança de idioma**
+    - Idioma inglês adicionado
+- **Mudança no design do ícone**
+    - Mudanças no tamanho e cores do ícone   
 
 ### Versão 1.0.8
 - **Correções de bugs**
@@ -98,13 +96,3 @@ Este é um aplicativo de placar de vôlei desenvolvido em React Native. Ele perm
 - **react-native-vector-icons**: Ícones para os botões e modo escuro/claro.
 - **react-native-sound**: Gerenciamento de sons para início e fim de partida.
 
-## Instalação e Execução
-
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/seu-usuario/seu-repositorio.git
-
-2. cd seu-repositorio
-npm install
-
-3. npx expo start

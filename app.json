@@ -2,23 +2,22 @@
   "expo": {
     "name": "GameScore",
     "slug": "PlacarVolei",
-    "version": "1.0.8",
-    "newArchEnabled": true,
+    "version": "1.0.9",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "cover",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FFFFFF"
     },
     
     "android": {
-      "versionCode": 8,
-      "resizeMode": "cover",
+      "versionCode": 9,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/icon_foreground.png",
+        "backgroundColor": "#00CED1"
       },
       "package": "com.gamescore"
     },

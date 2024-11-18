@@ -1,6 +1,6 @@
 {
   "name": "PlacarVolei",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
@@ -14,10 +14,19 @@
     "@expo/metro-runtime": "~4.0.0",
     "expo": "^52.0.7",
     "expo-av": "~15.0.1",
+    "expo-dev-client": "~5.0.2",
+    "expo-device": "~7.0.1",
+    "expo-splash-screen": "~0.29.11",
+    "metro": "^0.81.0",
+    "metro-core": "^0.81.0",
+    "metro-react-native-babel-preset": "^0.77.0",
     "react": "18.3.1",
-    "react-native": "0.76.2",
+    "react-native": "^0.76.2",
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "~0.19.13"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@react-native-community/cli": "^15.1.2"
+  }
 }

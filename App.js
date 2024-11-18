@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Audio } from 'expo-av';
 import usaFlag from './assets/usa_flag.png';
 import languages from './locales/languages.json';
+import * as SplashScreen from "expo-splash-screen";
 
 
 export default function App() {
@@ -18,6 +19,16 @@ export default function App() {
   const [timer, setTimer] = useState(0);
   const [language, setLanguage] = useState('pt'); // Estado para o idioma ('pt' para português, 'en' para inglês)
 
+  // Altera o tempo de exibição da SplashScreen
+  useEffect(() => {
+    // Mantenha a Splash Screen visível
+    SplashScreen.preventAutoHideAsync();
+
+    // Aguarde 3 segundos antes de escondê-la
+    setTimeout(() => {
+      SplashScreen.hideAsync();
+    }, 3000);
+  }, []);
 
   // Utilizando o arquivo JSON para textos
   const texts = languages;
@@ -57,7 +68,7 @@ export default function App() {
     if (Running) {
       interval = setInterval(() => {
         setTimer(prevTime => prevTime + 1);
-      }, 3000);
+      }, 1000);
     } else if (!Running && timer !== 0) {
       clearInterval(interval);
     }
